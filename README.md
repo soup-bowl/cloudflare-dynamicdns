@@ -25,6 +25,17 @@ Run with environments:
 docker run ghcr.io/soup-bowl/cf-dynamicdns:edge --env CF_DOMAIN=<your Dynamic DNS domain> --env CF_TOKEN=<Your CF API Token>
 ```
 
+Run via Compose:
+
+```yml
+services:
+  cfdydns:
+    image: ghcr.io/soup-bowl/cf-dynamicdns:edge
+    environment:
+      CF_TOKEN: <token>
+      CF_DOMAIN: example.com
+```
+
 ### Native
 
 ```bash
