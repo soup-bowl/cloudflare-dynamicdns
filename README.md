@@ -11,6 +11,8 @@ With a specified Cloudflare DNS API token and a subdomain, this tool will detect
 
 ## Usage
 
+**Until I implement a creation routine, ensure an entry exists before running this command, else it will error.**
+
 ### Docker
 
 Run with arguments:
