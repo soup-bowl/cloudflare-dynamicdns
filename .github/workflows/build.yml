@@ -42,7 +42,7 @@ jobs:
         push: true
         tags: soupbowl/cf-dynamicdns:edge,ghcr.io/soup-bowl/cf-dynamicdns:edge
         platforms: linux/amd64,linux/arm64,linux/arm/v7
-      
+
     - name: Build & Push - Production Edition
       if: ${{ github.event_name == 'release' }}
       uses: docker/build-push-action@v2
