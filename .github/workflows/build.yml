@@ -48,5 +48,5 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: soupbowl/cf-dynamicdns:${{ github.event.release.tag_name }},ghcr.io/soup-bowl/cf-dynamicdns:${{ github.event.release.tag_name }},soupbowl/cf-dynamicdns:edge,ghcr.io/soup-bowl/cf-dynamicdns:edge
+        tags: soupbowl/cf-dynamicdns:${{ github.event.release.tag_name }},ghcr.io/soup-bowl/cf-dynamicdns:${{ github.event.release.tag_name }},soupbowl/cf-dynamicdns:latest,ghcr.io/soup-bowl/cf-dynamicdns:latest
         platforms: linux/amd64,linux/arm64,linux/arm/v7
