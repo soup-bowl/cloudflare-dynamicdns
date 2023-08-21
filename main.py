@@ -1,6 +1,7 @@
 import json
 import requests
 from sys import argv
+from datetime import datetime
 from getopt import getopt, GetoptError
 from os import getenv
 
@@ -178,6 +179,7 @@ def set_ip(
         'type': record['type'],
         'name': record['name'],
         'content': new_ip,
+        'comment': "Automatic by DDNS - Set %s" % datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
         'ttl': 3600,
         'proxied': False
     }
