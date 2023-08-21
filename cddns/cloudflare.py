@@ -11,7 +11,7 @@ class Cloudflare:
 
 
 	def get_zone_token(self):
-		zone_response = self._request(f"{self.base_url}/zones/", self.token)
+		zone_response = self._get(f"{self.base_url}/zones/")
 		main_domain = '.'.join(self.domain.split('.')[-2:])
 		zone_token = None
 
@@ -32,7 +32,7 @@ class Cloudflare:
 
 
 	def get_records(self, zone_token:str):
-		dns_response = self._request(f"{self.base_url}/zones/{zone_token}/dns_records", self.token)
+		dns_response = self._get(f"{self.base_url}/zones/{zone_token}/dns_records")
 
 		dns_token = None
 		dns_record = None
@@ -86,10 +86,41 @@ class Cloudflare:
 			'proxied': False
 		}
 
-		response = requests.put(f"{self.base_url}/zones/{zone_token}/dns_records/{dns_token}", headers={
+		response = self._put(f"{self.base_url}/zones/{zone_token}/dns_records/{dns_token}", data)
+
+		return response
+
+
+	def _get(self, url: str) -> dict:
+		"""Calls the Cloudflare API.
+
+		Args:
+				url (str): The Cloudflare API URL to ping.
+
+		Returns:
+				dict: API response object.
+		"""
+
+		headers = {
 			'Authorization': f"Bearer {self.token}",
 			'Content-Type': 'application/json'
-		}, json=data)
+		}
+
+		response = requests.get(url, headers=headers)
+
+		if response.status_code == 200:
+			return json.loads(response.content)
+		else:
+			print("HTTP error was recieved: %s" % str(response.status_code))
+			exit(5)
+	
+	def _put(self, url, data):
+		headers = {
+			'Authorization': f"Bearer {self.token}",
+			'Content-Type': 'application/json'
+		}
+
+		response = requests.put(url, headers=headers, json=data)
 
 		if response.status_code == 200:
 			return json.loads(response.content)
@@ -106,28 +137,3 @@ class Cloudflare:
 					json.loads(response.content)['errors'][0]['message']
 				)
 			exit(6)
-
-
-	def _request(self, url: str, token: str) -> dict:
-		"""Calls the Cloudflare API.
-
-		Args:
-				url (str): The Cloudflare API URL to ping.
-				token (str): _description_
-
-		Returns:
-				dict: API response object.
-		"""
-
-		headers = {
-			'Authorization': f"Bearer {token}",
-			'Content-Type': 'application/json'
-		}
-
-		response = requests.get(url, headers=headers)
-
-		if response.status_code == 200:
-			return json.loads(response.content)
-		else:
-			print("HTTP error was recieved: %s" % str(response.status_code))
-			exit(5)
