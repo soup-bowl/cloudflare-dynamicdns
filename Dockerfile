@@ -4,6 +4,6 @@ WORKDIR /opt/app
 
 RUN pip install --no-cache-dir requests
 
-COPY main.py main.py
+COPY cddns cddns
 
-ENTRYPOINT [ "python", "main.py" ]
+ENTRYPOINT [ "python", "-m", "cddns" ]
