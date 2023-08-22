@@ -16,13 +16,17 @@ With a specified Cloudflare DNS API token and a subdomain, this tool will detect
 Run with arguments:
 
 ```bash
-docker run ghcr.io/soup-bowl/cf-dynamicdns:edge --domain <your Dynamic DNS domain> --token <Your CF API Token>
+docker run ghcr.io/soup-bowl/cf-dynamicdns:edge \
+  && --domain <your Dynamic DNS domain> \
+  && --token <Your CF API Token>
 ```
 
 Run with environments:
 
 ```bash
-docker run ghcr.io/soup-bowl/cf-dynamicdns:edge --env CF_DOMAIN=<your Dynamic DNS domain> --env CF_TOKEN=<Your CF API Token>
+docker run ghcr.io/soup-bowl/cf-dynamicdns:edge \
+  && --env CF_DOMAIN=<your Dynamic DNS domain> \
+  && --env CF_TOKEN=<Your CF API Token>
 ```
 
 Run via Compose:
