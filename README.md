@@ -43,7 +43,7 @@ There are executables on the [Releases page](https://github.com/soup-bowl/cloudf
 Below is a one-liner script to download and install to the binary path on Linux (requires sudo).
 
 ```bash
-wget -O /tmp/cddns.zip "https://github.com/soup-bowl/cloudflare-dynamicdns/releases/download/0.2/cddns-0.2-linux-amd64.zip" \
+wget -O /tmp/cddns.zip "https://github.com/soup-bowl/cloudflare-dynamicdns/releases/download/0.2/cddns-0.2-linux-$(dpkg --print-architecture).zip" \
   && unzip /tmp/cddns.zip -d /tmp \
   && rm /tmp/cddns.zip \
   && chmod +x /tmp/cddns \
