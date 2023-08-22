@@ -2,7 +2,8 @@ FROM python:3-alpine
 
 WORKDIR /opt/app
 
-RUN pip install --no-cache-dir requests
+COPY requirements.txt .
+RUN pip install -r requirements.txt
 
 COPY cddns cddns
 
