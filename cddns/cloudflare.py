@@ -20,13 +20,12 @@ class Cloudflare:
 				zone_token = main_zone['id']
 		
 		if zone_token is None:
-			print(
+			raise Exception(
 				(
 					"The specified domain wasn't found in the returned response "
 					"- does the token have clearance to the DNS?"
 				)
 			)
-			exit(4)
 		
 		return zone_token
 
@@ -43,13 +42,12 @@ class Cloudflare:
 				dns_record = dns_zone
 
 		if dns_token is None:
-			print(
+			raise Exception(
 				(
 					"Got a zone token, but couldn't locate the domain. "
 					"Is the subdomain correct?"
 				)
 			)
-			exit(4)
 		
 		return {
 			'token': dns_token,
@@ -61,7 +59,6 @@ class Cloudflare:
 		self,
 		zone_token: str,
 		new_ip: str,
-		dns_token: str,
 		record: dict
 	) -> dict:
 		"""Calls the DNS zone set API, and provides the returning object.
@@ -78,15 +75,15 @@ class Cloudflare:
 		"""
 
 		data = {
-			'type': record['type'],
-			'name': record['name'],
+			'type': record['record']['type'],
+			'name': record['record']['name'],
 			'content': new_ip,
 			'comment': "Automatic by DDNS - Set %s" % datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
 			'ttl': 3600,
 			'proxied': False
 		}
 
-		response = self._put(f"{self.base_url}/zones/{zone_token}/dns_records/{dns_token}", data)
+		response = self._put(f"{self.base_url}/zones/{zone_token}/dns_records/{record['token']}", data)
 
 		return response
 
@@ -111,8 +108,14 @@ class Cloudflare:
 		if response.status_code == 200:
 			return json.loads(response.content)
 		else:
-			print("HTTP error was recieved: %s" % str(response.status_code))
-			exit(5)
+			deeperr = ''
+			if response.status_code == 400:
+				deeperr = "\nDetails (%s): %s (is your token correct?)" % \
+				(str(json.loads(response.content)['errors'][0]['code']),
+     			json.loads(response.content)['errors'][0]['message'])
+
+			error_message = f"HTTP error was received: {response.status_code} {deeperr}"
+			raise Exception(error_message)
 	
 	def _put(self, url, data):
 		headers = {
@@ -125,15 +128,11 @@ class Cloudflare:
 		if response.status_code == 200:
 			return json.loads(response.content)
 		else:
-			print(
-				"HTTP error was recieved sending the payload: %s"
-				% str(response.status_code)
-			)
-
+			deeperr = ''
 			if response.status_code == 400:
-				print(
-					str(json.loads(response.content)['errors'][0]['code']) +
-					': ' +
-					json.loads(response.content)['errors'][0]['message']
-				)
-			exit(6)
+				deeperr = "\nDetails (%s): %s" % \
+				(str(json.loads(response.content)['errors'][0]['code']),
+     			json.loads(response.content)['errors'][0]['message'])
+
+			error_message = f"HTTP error was recieved sending the payload: {response.status_code} {deeperr}"
+			raise Exception(error_message)

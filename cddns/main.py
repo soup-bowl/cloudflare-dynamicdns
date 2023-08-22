@@ -1,7 +1,5 @@
-import json
 import requests
 from sys import argv
-from datetime import datetime
 from getopt import getopt, GetoptError
 from os import getenv
 
@@ -14,17 +12,16 @@ def main() -> None:
     conf = get_configs()
     cf = Cloudflare(conf['token'], conf['domain'])
 
-    zone_token = cf.get_zone_token()
-    dns_record = cf.get_records(zone_token)
-    final_reply = cf.set_record(
-        zone_token,
-        get_ip(conf['ipv6']),
-        dns_record['token'],
-        dns_record['record']
-    )
+    try:
+        zone_token = cf.get_zone_token()
+        dns_record = cf.get_records(zone_token)
+        final_reply = cf.set_record(zone_token, get_ip(conf['ipv6']), dns_record)
+    except Exception as e:
+        print(f"\033[91mError\033[00m: {e}")
+        exit(5)
 
     print(
-        "Success: Your address %s has been changed to the IP %s" %
+        "\033[92mSuccess\033[00m: Your address %s has been changed to the IP %s" %
         (final_reply['result']['name'], final_reply['result']['content'])
     )
     exit(0)
