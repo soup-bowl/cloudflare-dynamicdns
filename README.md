@@ -1,4 +1,4 @@
-# Cloudflare Dynamic DNS
+# Cloudflare Dynamic DNS (CDDNS)
 
 [![](https://img.shields.io/docker/pulls/soupbowl/cf-dynamicdns?logo=docker&logoColor=white)](https://hub.docker.com/r/soupbowl/cf-dynamicdns)
 [![CodeFactor](https://www.codefactor.io/repository/github/soup-bowl/cloudflare-dynamicdns/badge)](https://www.codefactor.io/repository/github/soup-bowl/cloudflare-dynamicdns)

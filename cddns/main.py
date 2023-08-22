@@ -1,5 +1,5 @@
 import requests
-from sys import argv
+from sys import argv, exit
 from getopt import getopt, GetoptError
 from os import getenv
 
