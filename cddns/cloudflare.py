@@ -25,7 +25,7 @@ class Cloudflare:
 			str: Zone token for the domain.
 		
 		Raises:
-			Exception: If the specified domain is not found in the Cloudflare zones.
+			LogicExeption: If the specified domain is not found in the Cloudflare zones.
 		"""
 		zone_response = self._get(f"{self.base_url}/zones/")
 		main_domain = '.'.join(self.domain.split('.')[-2:])
@@ -36,7 +36,7 @@ class Cloudflare:
 				zone_token = main_zone['id']
 		
 		if zone_token is None:
-			raise Exception(
+			raise LogicExeption(
 				(
 					"The specified domain wasn't found in the returned response "
 					"- does the token have clearance to the DNS?"
@@ -57,7 +57,7 @@ class Cloudflare:
 			dict: Dictionary containing the token and record information.
 
 		Raises:
-			Exception: If the domain is not found in the zone's DNS records.
+			LogicExeption: If the domain is not found in the zone's DNS records.
 		"""
 		dns_response = self._get(f"{self.base_url}/zones/{zone_token}/dns_records")
 
@@ -70,7 +70,7 @@ class Cloudflare:
 				dns_record = dns_zone
 
 		if dns_token is None:
-			raise Exception(
+			raise LogicExeption(
 				(
 					"Got a zone token, but couldn't locate the domain. "
 					"Is the subdomain correct?"
@@ -126,7 +126,7 @@ class Cloudflare:
 			dict: API response object.
 
 		Raises:
-			Exception: If the API returns an error.
+			CommunicationException: If the API returns an error.
 		"""
 
 		headers = {
@@ -146,7 +146,7 @@ class Cloudflare:
 	 			json.loads(response.content)['errors'][0]['message'])
 
 			error_message = f"HTTP error was received: {response.status_code} {deeperr}"
-			raise Exception(error_message)
+			raise CommunicationException(error_message)
 	
 	def _put(self, url, data):
 		"""
@@ -160,7 +160,7 @@ class Cloudflare:
 			dict: API response object.
 
 		Raises:
-			Exception: If the API returns an error.
+			CommunicationException: If the API returns an error.
 		"""
 		headers = {
 			'Authorization': f"Bearer {self.token}",
@@ -179,4 +179,19 @@ class Cloudflare:
 	 			json.loads(response.content)['errors'][0]['message'])
 
 			error_message = f"HTTP error was recieved sending the payload: {response.status_code} {deeperr}"
-			raise Exception(error_message)
+			raise CommunicationException(error_message)
+
+class CFDDNSException(Exception):
+    pass
+
+class CommunicationException(CFDDNSException):
+    pass
+
+class LogicExeption(CFDDNSException):
+    pass
+
+class MissingDomainException(LogicExeption):
+	pass
+
+class MissingSubdomainException(LogicExeption):
+	pass

@@ -3,7 +3,7 @@ from sys import argv
 from getopt import getopt, GetoptError
 from os import getenv
 
-from cddns.cloudflare import Cloudflare
+from cddns.cloudflare import Cloudflare, CommunicationException, LogicExeption
 
 
 def main() -> None:
@@ -16,14 +16,14 @@ def main() -> None:
         zone_token = cf.get_zone_token()
         dns_record = cf.get_records(zone_token)
         final_reply = cf.set_record(zone_token, get_ip(conf['ipv6']), dns_record)
-    except Exception as e:
-        print(f"\033[91mError\033[00m: {e}")
-        exit(5)
+    except CommunicationException as e:
+        print(f"{string_colour('Error', 'RED')}: {e}")
+        exit(1)
+    except LogicExeption as e:
+        print(f"{string_colour('Error', 'RED')}: {e}")
+        exit(2)
 
-    print(
-        "\033[92mSuccess\033[00m: Your address %s has been changed to the IP %s" %
-        (final_reply['result']['name'], final_reply['result']['content'])
-    )
+    print(f"{string_colour('Success', 'GREEN')}: Your address {final_reply['result']['name']} has been changed to the IP {final_reply['result']['content']}")
     exit(0)
 
 
@@ -102,5 +102,12 @@ def get_ip(v6: bool = False) -> str:
         print("Failure retrieving IP address: %s" % str(ip.status_code))
         exit(7)
 
+def string_colour(str, colour):
+    if colour == "RED":
+        return f"\033[91m{str}\033[00m"
+    if colour == "GREEN":
+        return f"\033[92m{str}\033[00m"
+    else:
+        return str
 
 main()
