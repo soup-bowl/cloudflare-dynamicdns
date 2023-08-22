@@ -7,7 +7,8 @@ from cddns.cloudflare import Cloudflare, CommunicationException, LogicExeption
 
 
 def main() -> None:
-    """Executed on CLI command - runs the Dynamic DNS routine.
+    """
+    Executed on CLI command - runs the Dynamic DNS routine.
     """
     conf = get_configs()
     cf = Cloudflare(conf['token'], conf['domain'])
@@ -19,7 +20,7 @@ def main() -> None:
     try:
         zone_token = cf.get_zone_token()
     except LogicExeption as e:
-        print(f"{string_colour('Error', 'RED')}: {e}")
+        print(f"{string_colour('Error', 'R')}: {e}")
         exit(3)
     
     try:
@@ -28,26 +29,27 @@ def main() -> None:
         try:
             final_reply = cf.new_record(zone_token, conf['domain'], get_ip(conf['ipv6']), conf['ipv6'], conf['proxy'])
         except CommunicationException as e:
-            print(f"{string_colour('Error', 'RED')}: {e}")
+            print(f"{string_colour('Error', 'R')}: {e}")
             exit(4)
     
     if final_reply is None:
         try:
             final_reply = cf.update_record(zone_token, get_ip(conf['ipv6']), dns_record)
         except CommunicationException as e:
-            print(f"{string_colour('Error', 'RED')}: {e}")
+            print(f"{string_colour('Error', 'R')}: {e}")
             exit(4)
 
-    print(f"{string_colour('Success', 'GREEN')}: Your address {final_reply['result']['name']} has been changed to the IP {final_reply['result']['content']}")
+    print(f"{string_colour('Success', 'G')}: Your address {final_reply['result']['name']} has been changed to the IP {final_reply['result']['content']}")
     exit(0)
 
 
 def get_configs() -> dict:
-    """Gets the configuration from env. Failing that, it checks for specified
-        execution arguments.
+    """
+    Gets the configuration from env. Failing that, it checks for specified
+    execution arguments.
 
     Returns:
-            dict: Configuration object.
+        dict: Configuration object.
     """
 
     conf = {
@@ -59,13 +61,19 @@ def get_configs() -> dict:
 
     if not all([conf['token'], conf['domain']]):
         try:
-            opts, args = getopt(argv[1::], "pd:t:", [
-                "ipv6", "domain=", "token=", "proxy"
+            opts, args = getopt(argv[1::], "hvpd:t:", [
+                "help", "version", "ipv6", "domain=", "token=", "proxy"
             ])
         except GetoptError:
             pass
 
         for opt, arg in opts:
+            if opt in ('-h', '--help'):
+                print_help()
+                exit(0)
+            if opt in ('-v', '--version'):
+                print_version()
+                exit(0)
             if opt in ('--ipv6'):
                 conf['ipv6'] = True
             if opt in ('-t', '--token'):
@@ -76,37 +84,23 @@ def get_configs() -> dict:
                 conf['proxy'] = True
 
         if not all([conf['token'], conf['domain']]):
-            print(
-                (
-                    "Please specify a Cloudflare token using -t/--token and "
-                    "a domain using -d/--domain."
-                    "\n"
-                    "Alternatively, specify in the system env using CF_TOKEN "
-                    "and CF_DOMAIN."
-                    "\n\n"
-                    "This tool uses the Clouflare 'API Token', you can get "
-                    "one by visiting this URL:"
-                    "\n"
-                    "https://dash.cloudflare.com/profile/api-tokens"
-                    "\n\n"
-                    "Ensure the token is given 'Zone.DNS' permissions. This "
-                    "is *all that is needed*, so don't give it more."
-                )
-            )
+            print(f"{string_colour('Error', 'R')}: You're missing either the token, or the version\n")
+            print_help()
             exit(2)
 
     return conf
 
 
 def get_ip(v6: bool = False) -> str:
-    """Gets the public API of the current machine.
+    """
+    Gets the public API of the current machine.
 
     Args:
-            v6 (bool, optional): Whether to return an IPv6 address.
-            Defaults to False (IPv4).
+        v6 (bool, optional): Whether to return an IPv6 address.
+        Defaults to False (IPv4).
 
     Returns:
-            str: IP address.
+        str: IP address.
     """
 
     if v6:
@@ -117,15 +111,53 @@ def get_ip(v6: bool = False) -> str:
     if ip.status_code == 200:
         return ip.text
     else:
-        print(f"{string_colour('Error', 'RED')}: Failure retrieving IP address: {str(ip.status_code)}")
+        print(f"{string_colour('Error', 'R')}: Failure retrieving IP address: {str(ip.status_code)}")
         exit(7)
 
 def string_colour(str, colour):
-    if colour == "RED":
+    if colour == "R":
         return f"\033[91m{str}\033[00m"
-    if colour == "GREEN":
+    if colour == "G":
         return f"\033[92m{str}\033[00m"
+    if colour == "Y":
+        return f"\033[93m{str}\033[00m"
     else:
         return str
 
-main()
+def pad_string(input_string, desired_length):
+    if len(input_string) >= desired_length:
+        return input_string[:desired_length]
+    else:
+        padding = ' ' * (desired_length - len(input_string))
+        return input_string + padding
+
+def print_help():
+    """
+    Prints help text to the screen.
+    """
+
+    pad = 17
+
+    print("Specify a Cloudflare Access Token and a desired (sub)domain, and the application will assign ", end='')
+    print("the record with your IP address.")
+    print("")
+    print(string_colour('Options:', 'Y'))
+    print(f"{string_colour(pad_string('-t, --token', pad), 'G')} Your Cloudflare API token.")
+    print(f"{pad_string('', pad)} You can get them from {string_colour('https://dash.cloudflare.com/profile/api-tokens', 'Y')}")
+    print(f"{pad_string('', pad)} Assign {string_colour('Zone.DNS', 'Y')} permission to the domain you wish to modify.")
+    print(f"{string_colour(pad_string('-d, --domain', pad), 'G')} The FQDN you wish to create/update with the IP address.")
+    print(f"{string_colour(pad_string('-p, --proxy', pad), 'G')} Use Cloudflare Proxy for the domain")
+    print(f"{pad_string('', pad)} Only impacts record {string_colour('creation', 'Y')}, not {string_colour('update', 'Y')}.")
+    print(f"{string_colour(pad_string('    --ipv6', pad), 'G')} Assigns and updates an AAAA record with IPv6 instead.")
+    print(f"{pad_string('', pad)} Will crash if the destination record is IPv4, and vice versa.")
+    print("")
+    print(f"{string_colour(pad_string('-v, --version', pad), 'G')} Display script version.")
+    print(f"{string_colour(pad_string('-h, --help', pad), 'G')} Displays this help information.")
+
+def print_version():
+    """
+    Prints version text to the screen.
+    """
+
+    print("Cloudflare Dynamic DNS (CDDNS) by soup-bowl (code@soupbowl.io) - pre-alpha.")
+    print("Source: https://github.com/soup-bowl/cloudflare-dynamicdns/")
