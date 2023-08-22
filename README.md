@@ -13,6 +13,8 @@ With a specified Cloudflare DNS API token and a subdomain, this tool will detect
 
 ### Docker
 
+They can also be found on [Dockerhub](https://hub.docker.com/r/soupbowl/cf-dynamicdns).
+
 Run with arguments:
 
 ```bash
