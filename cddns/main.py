@@ -10,6 +10,7 @@ def main() -> None:
     """
     Executed on CLI command - runs the Dynamic DNS routine.
     """
+
     conf = get_configs()
     cf = Cloudflare(conf['token'], conf['domain'])
 
@@ -114,7 +115,18 @@ def get_ip(v6: bool = False) -> str:
         print(f"{string_colour('Error', 'R')}: Failure retrieving IP address: {str(ip.status_code)}")
         exit(7)
 
-def string_colour(str, colour):
+def string_colour(str: str, colour: str) -> str:
+    """
+    Modifies the input string to use terminal output colour codes.
+
+    Args:
+        str (str): The string to be colourised.
+        colour (str): The initial of a supported colour.
+
+    Returns:
+        str: The coloured string, or the str input if the colour is invalid.
+    """
+
     if colour == "R":
         return f"\033[91m{str}\033[00m"
     if colour == "G":
@@ -124,7 +136,18 @@ def string_colour(str, colour):
     else:
         return str
 
-def pad_string(input_string, desired_length):
+def pad_string(input_string: str, desired_length: int) -> str:
+    """
+    Pads the input out with spaces (or truncates if too long).
+
+    Args:
+        input_string (str): The string to be modified.
+        desired_length (int): The length it should be.
+
+    Returns:
+        str: The modified string.
+    """
+
     if len(input_string) >= desired_length:
         return input_string[:desired_length]
     else:
