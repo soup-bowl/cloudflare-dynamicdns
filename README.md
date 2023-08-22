@@ -15,28 +15,34 @@ With a specified Cloudflare DNS API token and a subdomain, this tool will detect
 
 They can also be found on [Dockerhub](https://hub.docker.com/r/soupbowl/cf-dynamicdns).
 
-Run with arguments:
+See the help documentation for more details:
 
 ```bash
-docker run ghcr.io/soup-bowl/cf-dynamicdns:edge \
+docker run ghcr.io/soup-bowl/cf-dynamicdns:latest --help
+```
+
+Run with **arguments**:
+
+```bash
+docker run ghcr.io/soup-bowl/cf-dynamicdns:latest \
   && --domain <your Dynamic DNS domain> \
   && --token <Your CF API Token>
 ```
 
-Run with environments:
+Run with **environments**:
 
 ```bash
-docker run ghcr.io/soup-bowl/cf-dynamicdns:edge \
+docker run ghcr.io/soup-bowl/cf-dynamicdns:latest \
   && --env CF_DOMAIN=<your Dynamic DNS domain> \
   && --env CF_TOKEN=<Your CF API Token>
 ```
 
-Run via Compose:
+Run via **Docker/Podman Compose**:
 
 ```yml
 services:
   cfdydns:
-    image: ghcr.io/soup-bowl/cf-dynamicdns:edge
+    image: ghcr.io/soup-bowl/cf-dynamicdns:latest
     environment:
       CF_TOKEN: <token>
       CF_DOMAIN: example.com
