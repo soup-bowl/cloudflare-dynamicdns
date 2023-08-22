@@ -11,8 +11,6 @@ With a specified Cloudflare DNS API token and a subdomain, this tool will detect
 
 ## Usage
 
-**Until I implement a creation routine, ensure an entry exists before running this command, else it will error.**
-
 ### Docker
 
 Run with arguments:
@@ -37,6 +35,23 @@ services:
       CF_TOKEN: <token>
       CF_DOMAIN: example.com
 ```
+
+### Executable
+
+There are executables on the [Releases page](https://github.com/soup-bowl/cloudflare-dynamicdns/releases/latest). These should work *without* Python being installed.
+
+Below is a one-liner script to download and install to the binary path on Linux (requires sudo).
+
+```bash
+wget -O /tmp/cddns.zip "https://github.com/soup-bowl/cloudflare-dynamicdns/releases/download/0.2/cddns-0.2-linux-amd64.zip" \
+  && unzip /tmp/cddns.zip -d /tmp \
+  && rm /tmp/cddns.zip \
+  && chmod +x /tmp/cddns \
+  && sudo chown root:root /tmp/cddns \
+  && sudo mv /tmp/cddns /bin/
+```
+
+Verify by running `cddns -v`.
 
 ### Native
 
