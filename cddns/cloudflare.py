@@ -83,14 +83,38 @@ class Cloudflare:
 		}
 
 
-	def set_record(
-		self,
-		zone_token: str,
-		new_ip: str,
-		record: dict
-	) -> dict:
+	def new_record(self, zone_token: str, domain: str, new_ip: str, is_ipv6: bool = False, proxy: bool = False) -> dict:
 		"""
-		Set a new IP address for a DNS record.
+		Creates a new DNS record.
+
+		Args:
+			zone_token (str): Zone token for the DNS record.
+			domain (str): The domain to assign an IP to.
+			new_ip (str): New IP address to set.
+			is_ipv6 (bool): Create AAAA instead of A.
+			proxy (bool): Proxy through Cloudflare.
+
+		Returns:
+			dict: Response from the API after setting the new IP address.
+		"""
+
+		data = {
+			'type': "AAAA" if is_ipv6 else "A",
+			'name': domain,
+			'content': new_ip,
+			'comment': f"Automatic by DDNS - Set {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+			'ttl': 3600,
+			'proxied': proxy
+		}
+
+		response = self._post(f"{self.base_url}/zones/{zone_token}/dns_records", data)
+
+		return response
+
+
+	def update_record(self, zone_token: str, new_ip: str, record: dict) -> dict:
+		"""
+		Updates the IP address for a DNS record.
 
 		Args:
 			zone_token (str): Zone token for the DNS record.
@@ -105,9 +129,9 @@ class Cloudflare:
 			'type': record['record']['type'],
 			'name': record['record']['name'],
 			'content': new_ip,
-			'comment': "Automatic by DDNS - Set %s" % datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-			'ttl': 3600,
-			'proxied': False
+			'comment': f"Automatic by DDNS - Set {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+			'ttl': record['record']['ttl'],
+			'proxied': record['record']['proxied']
 		}
 
 		response = self._put(f"{self.base_url}/zones/{zone_token}/dns_records/{record['token']}", data)
@@ -146,6 +170,39 @@ class Cloudflare:
 	 			json.loads(response.content)['errors'][0]['message'])
 
 			error_message = f"HTTP error was received: {response.status_code} {deeperr}"
+			raise CommunicationException(error_message)
+	
+	def _post(self, url, data):
+		"""
+		Make a POST request to the Cloudflare API.
+
+		Args:
+			url (str): URL to send the POST request.
+			data: Data to be sent in the request payload.
+
+		Returns:
+			dict: API response object.
+
+		Raises:
+			CommunicationException: If the API returns an error.
+		"""
+		headers = {
+			'Authorization': f"Bearer {self.token}",
+			'Content-Type': 'application/json'
+		}
+
+		response = requests.post(url, headers=headers, json=data)
+
+		if response.status_code == 200:
+			return json.loads(response.content)
+		else:
+			deeperr = ''
+			if response.status_code == 400:
+				deeperr = "\nDetails (%s): %s" % \
+				(str(json.loads(response.content)['errors'][0]['code']),
+	 			json.loads(response.content)['errors'][0]['message'])
+
+			error_message = f"HTTP error was recieved sending the payload: {response.status_code} {deeperr}"
 			raise CommunicationException(error_message)
 	
 	def _put(self, url, data):
