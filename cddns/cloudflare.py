@@ -5,12 +5,28 @@ from datetime import datetime
 
 class Cloudflare:
 	def __init__(self, token, domain):
+		"""
+		Initialize a Cloudflare API client.
+
+		Args:
+			token (str): Cloudflare API token.
+			domain (str): The domain for which DNS records are managed.
+		"""
 		self.token = token
 		self.domain = domain
 		self.base_url = "https://api.cloudflare.com/client/v4/"
 
 
 	def get_zone_token(self):
+		"""
+		Get the zone token for the specified domain.
+
+		Returns:
+			str: Zone token for the domain.
+		
+		Raises:
+			Exception: If the specified domain is not found in the Cloudflare zones.
+		"""
 		zone_response = self._get(f"{self.base_url}/zones/")
 		main_domain = '.'.join(self.domain.split('.')[-2:])
 		zone_token = None
@@ -31,6 +47,18 @@ class Cloudflare:
 
 
 	def get_records(self, zone_token:str):
+		"""
+		Get DNS records for the specified zone token.
+
+		Args:
+			zone_token (str): Zone token for which to retrieve DNS records.
+
+		Returns:
+			dict: Dictionary containing the token and record information.
+
+		Raises:
+			Exception: If the domain is not found in the zone's DNS records.
+		"""
 		dns_response = self._get(f"{self.base_url}/zones/{zone_token}/dns_records")
 
 		dns_token = None
@@ -61,17 +89,16 @@ class Cloudflare:
 		new_ip: str,
 		record: dict
 	) -> dict:
-		"""Calls the DNS zone set API, and provides the returning object.
+		"""
+		Set a new IP address for a DNS record.
 
 		Args:
-				token (str): API token.
-				zone_token (str): Zone token from v4/zones.
-				dns_token (str): Record token from v4/zones/<>/dns_records.
-				new_ip (str): What the value is to be changed to.
-				record (dict): Record object from the Cloudflare dns_records API.
+			zone_token (str): Zone token for the DNS record.
+			new_ip (str): New IP address to set.
+			record (dict): DNS record object.
 
 		Returns:
-				dict: _description_
+			dict: Response from the API after setting the new IP address.
 		"""
 
 		data = {
@@ -89,13 +116,17 @@ class Cloudflare:
 
 
 	def _get(self, url: str) -> dict:
-		"""Calls the Cloudflare API.
+		"""
+		Make a GET request to the Cloudflare API.
 
 		Args:
-				url (str): The Cloudflare API URL to ping.
+			url (str): URL to send the GET request.
 
 		Returns:
-				dict: API response object.
+			dict: API response object.
+
+		Raises:
+			Exception: If the API returns an error.
 		"""
 
 		headers = {
@@ -112,12 +143,25 @@ class Cloudflare:
 			if response.status_code == 400:
 				deeperr = "\nDetails (%s): %s (is your token correct?)" % \
 				(str(json.loads(response.content)['errors'][0]['code']),
-     			json.loads(response.content)['errors'][0]['message'])
+	 			json.loads(response.content)['errors'][0]['message'])
 
 			error_message = f"HTTP error was received: {response.status_code} {deeperr}"
 			raise Exception(error_message)
 	
 	def _put(self, url, data):
+		"""
+		Make a PUT request to the Cloudflare API.
+
+		Args:
+			url (str): URL to send the PUT request.
+			data: Data to be sent in the request payload.
+
+		Returns:
+			dict: API response object.
+
+		Raises:
+			Exception: If the API returns an error.
+		"""
 		headers = {
 			'Authorization': f"Bearer {self.token}",
 			'Content-Type': 'application/json'
@@ -132,7 +176,7 @@ class Cloudflare:
 			if response.status_code == 400:
 				deeperr = "\nDetails (%s): %s" % \
 				(str(json.loads(response.content)['errors'][0]['code']),
-     			json.loads(response.content)['errors'][0]['message'])
+	 			json.loads(response.content)['errors'][0]['message'])
 
 			error_message = f"HTTP error was recieved sending the payload: {response.status_code} {deeperr}"
 			raise Exception(error_message)
