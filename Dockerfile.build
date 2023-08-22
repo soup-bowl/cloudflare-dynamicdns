@@ -3,7 +3,8 @@ FROM python:3 as build
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt && pip install pyinstaller
+RUN pip install --no-cache-dir -r requirements.txt && \
+	pip install --no-cache-dir pyinstaller
 
 COPY cddns cddns
 COPY run.py .
