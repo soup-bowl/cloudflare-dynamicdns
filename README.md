@@ -1,4 +1,4 @@
-# Cloudflare Dynamic DNS
+# Cloudflare Dynamic DNS (CDDNS)
 
 [![](https://img.shields.io/docker/pulls/soupbowl/cf-dynamicdns?logo=docker&logoColor=white)](https://hub.docker.com/r/soupbowl/cf-dynamicdns)
 [![CodeFactor](https://www.codefactor.io/repository/github/soup-bowl/cloudflare-dynamicdns/badge)](https://www.codefactor.io/repository/github/soup-bowl/cloudflare-dynamicdns)
@@ -41,7 +41,7 @@ services:
 ### Native
 
 ```bash
-python3 main.py --domain <your Dynamic DNS domain> --token <Your CF API Token>
+python3 -m cddns --domain <your Dynamic DNS domain> --token <Your CF API Token>
 ```
 
 (Arguments can be omitted if you have the values in your environment).

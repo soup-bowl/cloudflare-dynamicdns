@@ -2,8 +2,10 @@ FROM python:3-alpine
 
 WORKDIR /opt/app
 
-RUN pip install --no-cache-dir requests
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py main.py
+COPY cddns cddns
+COPY run.py .
 
-ENTRYPOINT [ "python", "main.py" ]
+ENTRYPOINT [ "python", "run.py" ]
