@@ -20,15 +20,22 @@ def main() -> None:
 
     try:
         zone_token = cf.get_zone_token()
+        print_debug(f"Fetched zone token {zone_token}", conf['debug'])
     except LogicExeption as e:
+        print(f"{string_colour('Error', 'R')}: {e}")
+        exit(3)
+    except CommunicationException as e:
         print(f"{string_colour('Error', 'R')}: {e}")
         exit(3)
     
     try:
         dns_record = cf.get_records(zone_token)
+        print_debug(f"Fetched DNS record ({cf.make_summary(dns_record['record'])})", conf['debug'])
     except LogicExeption as e:
+        print_debug(f"No record was found. Creating a new one...", conf['debug'])
         try:
             final_reply = cf.new_record(zone_token, conf['domain'], get_ip(conf['ipv6']), conf['ipv6'], conf['proxy'])
+            print_debug(f"Created new DNS record ({cf.make_summary(final_reply['result'])})", conf['debug'])
         except CommunicationException as e:
             print(f"{string_colour('Error', 'R')}: {e}")
             exit(4)
@@ -36,6 +43,7 @@ def main() -> None:
     if final_reply is None:
         try:
             final_reply = cf.update_record(zone_token, get_ip(conf['ipv6']), dns_record)
+            print_debug(f"Updated DNS record ({cf.make_summary(final_reply['result'])})", conf['debug'])
         except CommunicationException as e:
             print(f"{string_colour('Error', 'R')}: {e}")
             exit(4)
@@ -57,13 +65,14 @@ def get_configs() -> dict:
         'token': getenv("CF_TOKEN", None),
         'domain': getenv("CF_DOMAIN", None),
         'ipv6': getenv("CF_IPV6", False),
-        'proxy': getenv("CF_PROXY", False)
+        'proxy': getenv("CF_PROXY", False),
+        'debug': False
     }
 
     if not all([conf['token'], conf['domain']]):
         try:
             opts, args = getopt(argv[1::], "hvpd:t:", [
-                "help", "version", "ipv6", "domain=", "token=", "proxy"
+                "help", "version", "debug", "ipv6", "domain=", "token=", "proxy"
             ])
         except GetoptError:
             pass
@@ -75,6 +84,8 @@ def get_configs() -> dict:
             if opt in ('-v', '--version'):
                 print_version()
                 exit(0)
+            if opt in ('--debug'):
+                conf['debug'] = True
             if opt in ('--ipv6'):
                 conf['ipv6'] = True
             if opt in ('-t', '--token'):
@@ -131,6 +142,8 @@ def string_colour(str: str, colour: str) -> str:
         return f"\033[91m{str}\033[00m"
     if colour == "G":
         return f"\033[92m{str}\033[00m"
+    if colour == "B":
+        return f"\033[94m{str}\033[00m"
     if colour == "Y":
         return f"\033[93m{str}\033[00m"
     else:
@@ -154,6 +167,10 @@ def pad_string(input_string: str, desired_length: int) -> str:
         padding = ' ' * (desired_length - len(input_string))
         return input_string + padding
 
+def print_debug(message: str, debug: bool):
+    if debug:
+        print(f"{string_colour('Debug', 'B')}: {message}")
+
 def print_help():
     """
     Prints help text to the screen.
@@ -173,6 +190,7 @@ def print_help():
     print(f"{pad_string('', pad)} Only impacts record {string_colour('creation', 'Y')}, not {string_colour('update', 'Y')}.")
     print(f"{string_colour(pad_string('    --ipv6', pad), 'G')} Assigns and updates an AAAA record with IPv6 instead.")
     print(f"{pad_string('', pad)} Will crash if the destination record is IPv4, and vice versa.")
+    print(f"{string_colour(pad_string('    --debug', pad), 'G')} Enables a verbose output.")
     print("")
     print(f"{string_colour(pad_string('-v, --version', pad), 'G')} Display script version.")
     print(f"{string_colour(pad_string('-h, --help', pad), 'G')} Displays this help information.")
