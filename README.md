@@ -7,8 +7,7 @@
 With a specified Cloudflare DNS API token and a subdomain, this tool will detect your current IP address (using
 [ident.me](https://api.ident.me/)) and sets your Cloudflare DNS record to that value. Optionally supports IPv6.
 
-> :warning: **WARNING**
->
+> [!WARNING]  
 > This is not production ready, and undergoing pre-alpha changes - PRs will not be accepted at this time.
 
 ## Usage
