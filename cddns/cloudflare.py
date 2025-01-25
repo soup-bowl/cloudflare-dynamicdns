@@ -15,6 +15,7 @@ class Cloudflare:
 		self.token = token
 		self.domain = domain
 		self.base_url = "https://api.cloudflare.com/client/v4/"
+		self.response_type = "application/json"
 
 
 	def get_zone_token(self):
@@ -155,7 +156,7 @@ class Cloudflare:
 
 		headers = {
 			'Authorization': f"Bearer {self.token}",
-			'Content-Type': 'application/json'
+			'Content-Type': self.response_type
 		}
 
 		response = requests.get(url, headers=headers)
@@ -188,7 +189,7 @@ class Cloudflare:
 		"""
 		headers = {
 			'Authorization': f"Bearer {self.token}",
-			'Content-Type': 'application/json'
+			'Content-Type': self.response_type
 		}
 
 		response = requests.post(url, headers=headers, json=data)
@@ -221,7 +222,7 @@ class Cloudflare:
 		"""
 		headers = {
 			'Authorization': f"Bearer {self.token}",
-			'Content-Type': 'application/json'
+			'Content-Type': self.response_type
 		}
 
 		response = requests.put(url, headers=headers, json=data)

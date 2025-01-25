@@ -32,7 +32,7 @@ def main() -> None:
         dns_record = cf.get_records(zone_token)
         print_debug(f"Fetched DNS record ({dns_record['record']['name']}/{dns_record['record']['content']})", conf['debug'])
     except LogicExeption as e:
-        print_debug(f"No record was found. Creating a new one...", conf['debug'])
+        print_debug("No record was found. Creating a new one...", conf['debug'])
         try:
             final_reply = cf.new_record(zone_token, conf['domain'], get_ip(conf['ipv6']), conf['ipv6'], conf['proxy'])
             print_debug(f"Created new DNS record ({final_reply['result']['name']}/{final_reply['result']['content']})", conf['debug'])
@@ -71,7 +71,7 @@ def get_configs() -> dict:
 
     if not all([conf['token'], conf['domain']]):
         try:
-            opts, args = getopt(argv[1::], "hvpd:t:", [
+            opts, _ = getopt(argv[1::], "hvpd:t:", [
                 "help", "version", "debug", "ipv6", "domain=", "token=", "proxy"
             ])
         except GetoptError:
