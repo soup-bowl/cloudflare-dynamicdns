@@ -30,12 +30,12 @@ def main() -> None:
     
     try:
         dns_record = cf.get_records(zone_token)
-        print_debug(f"Fetched DNS record ({cf.make_summary(dns_record['record'])})", conf['debug'])
+        print_debug(f"Fetched DNS record ({dns_record['record']['name']}/{dns_record['record']['content']})", conf['debug'])
     except LogicExeption as e:
         print_debug(f"No record was found. Creating a new one...", conf['debug'])
         try:
             final_reply = cf.new_record(zone_token, conf['domain'], get_ip(conf['ipv6']), conf['ipv6'], conf['proxy'])
-            print_debug(f"Created new DNS record ({cf.make_summary(final_reply['result'])})", conf['debug'])
+            print_debug(f"Created new DNS record ({final_reply['result']['name']}/{final_reply['result']['content']})", conf['debug'])
         except CommunicationException as e:
             print(f"{string_colour('Error', 'R')}: {e}")
             exit(4)
@@ -43,7 +43,7 @@ def main() -> None:
     if final_reply is None:
         try:
             final_reply = cf.update_record(zone_token, get_ip(conf['ipv6']), dns_record)
-            print_debug(f"Updated DNS record ({cf.make_summary(final_reply['result'])})", conf['debug'])
+            print_debug(f"Updated DNS record ({final_reply['result']['name']}/{final_reply['result']['content']})", conf['debug'])
         except CommunicationException as e:
             print(f"{string_colour('Error', 'R')}: {e}")
             exit(4)
